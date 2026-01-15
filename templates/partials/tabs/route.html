@@ -1,0 +1,44 @@
+<div id="tab-route" class="tab-content active p-4">
+    <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+        <div class="flex items-center mb-3">
+            <div class="w-8 flex flex-col items-center mr-3 text-gray-400">
+                <i class="fas fa-circle text-[10px] mb-1 text-blue-500"></i>
+                <div class="h-8 border-l-2 border-dotted border-gray-300 my-1"></div>
+                <i class="fas fa-map-marker-alt text-red-500"></i>
+            </div>
+            <div class="flex-1 space-y-3">
+                <div class="relative">
+                    <input id="start-input" type="text" placeholder="출발지 입력" class="w-full bg-gray-100 p-2 pl-3 rounded text-sm text-gray-700 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 border border-transparent focus:border-blue-500 transition-colors">
+                    <span class="absolute right-3 top-2 text-gray-400 text-xs"><i class="fas fa-search"></i></span>
+                    <div id="start-results" class="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-md z-10 hidden"></div>
+                </div>
+                <div class="relative">
+                    <input id="end-input" type="text" placeholder="도착지 입력" class="w-full bg-gray-100 p-2 pl-3 rounded text-sm text-gray-700 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 border border-transparent focus:border-blue-500 transition-colors">
+                    <span class="absolute right-3 top-2 text-gray-400 text-xs"><i class="fas fa-search"></i></span>
+                    <div id="end-results" class="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-md z-10 hidden"></div>
+                </div>
+                <p class="text-[10px] text-gray-400">키워드 또는 좌표(경도,위도) 입력</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center text-sm text-gray-600 border-t pt-3 mt-2">
+            <div class="flex items-center w-full bg-gray-50 rounded px-2 py-1">
+                <i class="far fa-clock mr-2 text-blue-600"></i>
+                <input id="depart-dt" type="datetime-local" class="bg-transparent text-gray-700 text-sm focus:outline-none w-full font-medium">
+            </div>
+            <button class="ml-2 bg-blue-600 text-white px-4 py-1.5 rounded text-xs font-bold shadow hover:bg-blue-700 whitespace-nowrap" onclick="onClickSearch()">
+                길찾기
+            </button>
+        </div>
+    </div>
+
+    <div class="flex space-x-2 mb-4 overflow-x-auto pb-1 scrollbar-hide px-1">
+        <button class="sort-chip active" onclick="setSortMode('crowd', this)">최소 혼잡</button>
+        <button class="sort-chip" onclick="setSortMode('time', this)">최소 시간</button>
+        <button class="sort-chip" onclick="setSortMode('transfer', this)">최소 환승</button>
+        <button class="sort-chip" onclick="setSortMode('walk', this)">최소 도보</button>
+    </div>
+
+    <div id="route-list" class="space-y-3 pb-20"></div>
+</div>
+
