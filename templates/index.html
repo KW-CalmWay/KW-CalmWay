@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalmWay - 혼잡도 기반 길찾기</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey={{ tmap_app_key }}"></script>
+
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+
+<body>
+    <div id="app-container">
+
+        {% include "partials/header.html" %}
+
+        <div class="content-area bg-gray-50">
+            {% include "partials/tabs/route.html" %}
+            {% include "partials/tabs/analysis.html" %}
+            {% include "partials/tabs/settings.html" %}
+        </div>
+
+        {% include "partials/nav.html" %}
+        {% include "partials/map_modal.html" %}
+
+    </div>
+
+    <script src="/static/js/state.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/route.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/analysis.js"></script>
+    <script src="/static/js/settings.js"></script>
+</body>
+
+</html>
