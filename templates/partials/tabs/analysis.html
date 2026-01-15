@@ -1,0 +1,45 @@
+<div id="tab-analysis" class="tab-content p-4">
+    <div class="bg-white p-5 rounded-xl shadow-sm mb-4">
+        <div class="mb-3">
+            <h2 class="text-base font-bold text-gray-800 mb-2">AI 혼잡도 예측</h2>
+            <p class="text-xs text-gray-500 leading-relaxed">
+                2024~2025년 서울시 대중교통 승하차 공공데이터를 학습한 Random Forest 모델 예측 결과입니다.
+            </p>
+        </div>
+
+        <div class="mb-4">
+            <select id="line-filter" onchange="applyFilter()" class="w-full p-2 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500 bg-white">
+                <option value="all">종합 (전체 노선)</option>
+                <option value="line1">1호선</option>
+                <option value="line2">2호선</option>
+                <option value="line3">3호선</option>
+                <option value="line4">4호선</option>
+                <option value="line5">5호선</option>
+                <option value="line6">6호선</option>
+                <option value="line7">7호선</option>
+                <option value="line8">8호선</option>
+                <option value="line9">9호선</option>
+                <option value="airport">공항철도</option>
+                <option value="gyeongui">경의중앙선</option>
+                <option value="bundang">수인분당선</option>
+            </select>
+        </div>
+
+        <div class="flex bg-gray-100 p-1 rounded-lg mb-4">
+            <button class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-gray-800 shadow-sm transition-all" id="btn-chart-time" onclick="updateChartType('time')">시간별</button>
+            <button class="flex-1 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-700 transition-all" id="btn-chart-day" onclick="updateChartType('day')">요일별</button>
+            <button class="flex-1 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-700 transition-all" id="btn-chart-top" onclick="updateChartType('top')">상위 10곳</button>
+        </div>
+
+        <div class="h-64 relative w-full">
+            <canvas id="congestionChart"></canvas>
+        </div>
+
+        <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-start">
+            <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2 text-xs"></i>
+            <p id="chart-desc" class="text-xs text-gray-600 leading-snug">
+                퇴근 시간대(18~19시) 평균 혼잡도가 가장 높게 예측됩니다.
+            </p>
+        </div>
+    </div>
+</div>
