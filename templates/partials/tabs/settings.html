@@ -1,0 +1,49 @@
+<div id="tab-settings" class="tab-content p-4">
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
+        <div class="p-4 border-b border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800">개인화 맞춤 설정</h2>
+            <p class="text-xs text-gray-500">AI가 이 설정을 반영하여 경로 점수를 재계산합니다.</p>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+                        <i class="fas fa-suitcase"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium block">짐이 많음</span>
+                        <span class="text-[10px] text-gray-400">환승 및 도보 최소화 가중치 증가</span>
+                    </div>
+                </div>
+                <input type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3">
+                        <i class="fas fa-virus"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium block">감염병 예방</span>
+                        <span class="text-[10px] text-gray-400">고밀집 구간(혼잡도 80% 이상) 절대 회피</span>
+                    </div>
+                </div>
+                <input type="checkbox" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mr-3">
+                        <i class="fas fa-baby-carriage"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium block">교통약자/임산부</span>
+                        <span class="text-[10px] text-gray-400">엘리베이터 유무 및 저상버스 우선</span>
+                    </div>
+                </div>
+                <input type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300">
+            </div>
+        </div>
+    </div>
+</div>
