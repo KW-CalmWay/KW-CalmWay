@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
 body {
     font-family: 'Noto Sans KR', sans-serif;
@@ -85,6 +85,67 @@ body {
 .nav-item.active { color: #2563eb; }
 .nav-item.active span { font-weight: 700; }
 
+#top-graph-list .top-graph-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
+}
+
+#top-graph-list .top-graph-preview {
+    width: 100%;
+    height: 8rem;
+    object-fit: cover;
+    display: block;
+    object-position: left center;
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
+}
+
+.graph-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.7);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.graph-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    width: 390px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+.graph-modal-content img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.graph-modal-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: none;
+    background: #f3f4f6;
+    color: #4b5563;
+    cursor: pointer;
+}
+
 #map-modal {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -112,3 +173,4 @@ body {
 .line-9 { background-color: #bdb092; }
 .line-bus { background-color: #3b82f6; }
 .line-walk { background-color: #9ca3af; }
+

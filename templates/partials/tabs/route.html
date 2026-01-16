@@ -1,5 +1,6 @@
-<div id="tab-route" class="tab-content active p-4">
+﻿<div id="tab-route" class="tab-content active px-4 pb-4 -mt-2">
     <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+        <!-- 출발/도착 검색 -->
         <div class="flex items-center mb-3">
             <div class="w-8 flex flex-col items-center mr-3 text-gray-400">
                 <i class="fas fa-circle text-[10px] mb-1 text-blue-500"></i>
@@ -21,6 +22,7 @@
             </div>
         </div>
 
+        <!-- 출발 시간과 길찾기 실행 -->
         <div class="flex justify-between items-center text-sm text-gray-600 border-t pt-3 mt-2">
             <div class="flex items-center w-full bg-gray-50 rounded px-2 py-1">
                 <i class="far fa-clock mr-2 text-blue-600"></i>
@@ -32,6 +34,7 @@
         </div>
     </div>
 
+    <!-- 경로 정렬 기준 -->
     <div class="flex space-x-2 mb-4 overflow-x-auto pb-1 scrollbar-hide px-1">
         <button class="sort-chip active" onclick="setSortMode('crowd', this)">최소 혼잡</button>
         <button class="sort-chip" onclick="setSortMode('time', this)">최소 시간</button>
@@ -39,6 +42,6 @@
         <button class="sort-chip" onclick="setSortMode('walk', this)">최소 도보</button>
     </div>
 
+    <!-- 검색 결과 경로 카드 목록 -->
     <div id="route-list" class="space-y-3 pb-20"></div>
 </div>
-

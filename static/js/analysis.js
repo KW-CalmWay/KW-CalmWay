@@ -1,130 +1,297 @@
-window.chartInstance = null;
-window.currentChartType = 'time';
-window.currentFilter = 'all';
+﻿window.currentLineFilter = 'line1';
+window.currentDayFilter = 'weekdays';
 
-const chartDataSets = {
-    time: {
-        label: '시간대별 평균 혼잡도',
-        labels: ['07시', '09시', '12시', '15시', '18시', '20시', '23시'],
-        data: {
-            all: [60, 85, 40, 50, 95, 60, 30],
-            line1: [65, 90, 45, 55, 98, 65, 35],
-            line2: [70, 95, 50, 60, 99, 70, 40],
-            line3: [60, 85, 40, 50, 90, 60, 30],
-            line4: [65, 88, 45, 55, 95, 65, 35],
-            line5: [55, 80, 35, 45, 85, 55, 25],
-            line6: [50, 75, 30, 40, 80, 50, 20],
-            line7: [60, 85, 40, 50, 92, 60, 30],
-            line8: [55, 80, 35, 45, 88, 55, 25],
-            line9: [75, 98, 55, 65, 100, 75, 45],
-            airport: [40, 60, 30, 40, 70, 50, 20],
-            gyeongui: [50, 70, 35, 45, 80, 55, 25],
-            bundang: [55, 75, 40, 50, 85, 60, 30]
-        }
-    },
-    day: {
-        label: '요일별 평균 혼잡도',
-        labels: ['월', '화', '수', '목', '금', '토', '일'],
-        data: {
-            all: [75, 76, 74, 78, 85, 60, 40]
-        }
-    },
-    top: {
-        label: '상위 10개 혼잡역 (필터 미적용)',
-        labels: ['강남', '잠실', '홍대입구', '신림', '구로디지털', '역삼', '고속터미널', '서울역', '신도림', '삼성'],
-        data: {
-            all: [98, 95, 93, 91, 90, 88, 87, 86, 85, 84]
-        }
+// 상위 그래프 이미지 목록 (요일/호선/역)
+const TOP_GRAPH_FILES = [
+    '/static/images/topGraph/weekdays/line1/1호선_청량리_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_종로5가_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_종로3가_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_종각_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_제기동_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_신설동_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_시청_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_서울역_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_동묘앞_평일.jpg',
+    '/static/images/topGraph/weekdays/line1/1호선_동대문_평일.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_청량리_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_종로5가_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_종로3가_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_종각_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_제기동_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_신설동_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_시청_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_서울역_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_동묘앞_주말.jpg',
+    '/static/images/topGraph/weekend/line1/1호선_동대문_주말.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_신도림_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_선릉_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_홍대입구_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_잠실_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_을지로입구_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_역삼_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_신림_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_구로디지털단지_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_강남_평일.jpg',
+    '/static/images/topGraph/weekdays/line2/2호선_삼성_평일.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_홍대입구_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_잠실_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_을지로입구_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_역삼_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_신림_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_신도림_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_선릉_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_삼성_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_구로디지털단지_주말.jpg',
+    '/static/images/topGraph/weekend/line2/2호선_강남_주말.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_연신내_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_양재_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_압구정_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_안국_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_신사_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_수서_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_남부터미널_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_구파발_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_고속터미널_평일.jpg',
+    '/static/images/topGraph/weekdays/line3/3호선_경복궁_평일.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_연신내_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_양재_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_압구정_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_안국_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_신사_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_수서_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_남부터미널_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_구파발_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_고속터미널_주말.jpg',
+    '/static/images/topGraph/weekend/line3/3호선_경복궁_주말.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_회현_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_혜화_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_충무로_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_창동_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_쌍문_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_수유_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_사당_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_미아사거리_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_명동_평일.jpg',
+    '/static/images/topGraph/weekdays/line4/4호선_노원_평일.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_회현_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_사당_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_미아사거리_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_명동_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_노원_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_혜화_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_충무로_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_창동_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_쌍문_주말.jpg',
+    '/static/images/topGraph/weekend/line4/4호선_수유_주말.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_화곡_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_천호_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_장한평_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_오목교_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_여의도_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_서대문_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_발산_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_미사_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_까치산_평일.jpg',
+    '/static/images/topGraph/weekdays/line5/5호선_광화문_평일.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_화곡_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_천호_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_장한평_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_오목교_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_여의도_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_서대문_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_발산_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_미사_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_까치산_주말.jpg',
+    '/static/images/topGraph/weekend/line5/5호선_광화문_주말.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_합정_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_이태원_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_응암_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_안암_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_석계_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_새절_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_망원_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_마포구청_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_디지털미디어시티_평일.jpg',
+    '/static/images/topGraph/weekdays/line6/6호선_공덕_평일.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_합정_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_이태원_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_응암_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_안암_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_석계_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_새절_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_망원_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_마포구청_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_디지털미디어시티_주말.jpg',
+    '/static/images/topGraph/weekend/line6/6호선_공덕_주말.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_학동_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_하계_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_청담_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_철산_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_상봉_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_논현_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_노원_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_광명사거리_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_고속터미널_평일.jpg',
+    '/static/images/topGraph/weekdays/line7/7호선_가산디지털단지_평일.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_학동_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_하계_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_청담_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_철산_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_상봉_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_논현_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_노원_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_광명사거리_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_고속터미널_주말.jpg',
+    '/static/images/topGraph/weekend/line7/7호선_가산디지털단지_주말.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_천호_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_장지_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_잠실_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_암사_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_송파_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_석촌_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_문정_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_단대오거리_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_남한산성입구_평일.jpg',
+    '/static/images/topGraph/weekdays/line8/8호선_강동구청_평일.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_천호_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_장지_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_잠실_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_암사_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_송파_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_석촌_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_문정_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_단대오거리_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_남한산성입구_주말.jpg',
+    '/static/images/topGraph/weekend/line8/8호선_강동구청_주말.jpg'
+];
+
+// 표시 순서 및 라벨 캐시
+const LINE_ORDER = ['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7', 'line8'];
+const DAY_LABELS = { weekdays: '평일', weekend: '주말' };
+const lineLabels = {};
+const topGraphIndex = {};
+
+// 파일 경로를 인덱스로 변환
+TOP_GRAPH_FILES.forEach(path => {
+    const parts = path.split('/');
+    const dayKey = parts[4];
+    const lineKey = parts[5];
+    const filename = parts[6] || '';
+    const match = filename.match(/^(\d+호선)_(.+)_(평일|주말)\.jpg$/);
+    const lineLabel = match ? match[1] : lineKey;
+    const station = match ? match[2] : filename.replace('.jpg', '');
+
+    if (!topGraphIndex[lineKey]) {
+        topGraphIndex[lineKey] = { weekdays: [], weekend: [] };
     }
-};
-
-const allKeys = ['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7', 'line8', 'line9', 'airport', 'gyeongui', 'bundang'];
-allKeys.forEach(key => {
-    chartDataSets.day.data[key] = chartDataSets.day.data.all.map(v => Math.min(100, Math.max(10, v + (Math.random() * 10 - 5))));
+    if (!lineLabels[lineKey]) {
+        lineLabels[lineKey] = lineLabel;
+    }
+    if (topGraphIndex[lineKey][dayKey]) {
+        topGraphIndex[lineKey][dayKey].push({ path, station });
+    }
 });
 
+// 필터 변경 시 목록 재렌더
 window.applyFilter = function () {
-    window.currentFilter = document.getElementById('line-filter').value;
-    renderChart(window.currentChartType);
+    window.currentLineFilter = document.getElementById('line-filter').value;
+    window.currentDayFilter = document.getElementById('day-filter').value;
+    renderTopGraphs();
 };
 
-window.updateChartType = function (type) {
-    window.currentChartType = type;
+// 그래프 이미지 모달 열기
+window.openGraphModal = function (src, alt) {
+    const modal = document.getElementById('graph-modal');
+    const image = document.getElementById('graph-modal-image');
+    if (!modal || !image) {
+        return;
+    }
+    image.src = src;
+    image.alt = alt || '';
+    modal.classList.remove('hidden');
+};
 
-    const btns = ['btn-chart-time', 'btn-chart-day', 'btn-chart-top'];
-    btns.forEach(id => {
-        const el = document.getElementById(id);
-        if (id === 'btn-chart-' + type) {
-            el.classList.remove('text-gray-500', 'hover:text-gray-700', 'bg-white');
-            el.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'font-bold');
-        } else {
-            el.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'font-bold');
-            el.classList.add('text-gray-500', 'hover:text-gray-700');
+// 그래프 이미지 모달 닫기
+window.closeGraphModal = function () {
+    const modal = document.getElementById('graph-modal');
+    const image = document.getElementById('graph-modal-image');
+    if (image) {
+        image.src = '';
+        image.alt = '';
+    }
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+};
+
+// 필터 기준으로 카드 목록 구성
+window.renderTopGraphs = function () {
+    const lineFilter = window.currentLineFilter;
+    const dayFilter = window.currentDayFilter;
+    const container = document.getElementById('top-graph-list');
+    const emptyEl = document.getElementById('top-graph-empty');
+    const summaryEl = document.getElementById('top-graph-summary');
+
+    container.innerHTML = '';
+
+    const orderedLines = LINE_ORDER.filter(key => topGraphIndex[key]);
+    const extraLines = Object.keys(topGraphIndex).filter(key => !LINE_ORDER.includes(key));
+    const linesToShow = lineFilter === 'all' ? [...orderedLines, ...extraLines] : [lineFilter];
+    let totalItems = 0;
+
+    linesToShow.forEach(lineKey => {
+        const lineData = topGraphIndex[lineKey];
+        if (!lineData) {
+            return;
         }
+
+        const items = lineData[dayFilter] || [];
+        if (!items.length) {
+            return;
+        }
+
+        totalItems += items.length;
+
+        if (lineFilter === 'all') {
+            const header = document.createElement('div');
+            header.className = 'col-span-2 text-xs font-semibold text-gray-600 mt-2';
+            header.textContent = lineLabels[lineKey] || lineKey;
+            container.appendChild(header);
+        }
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'top-graph-card bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden cursor-pointer';
+            card.addEventListener('click', () => {
+                window.openGraphModal(item.path, item.station);
+            });
+
+            const img = document.createElement('img');
+            img.src = item.path;
+            img.alt = item.station;
+            img.className = 'top-graph-preview';
+
+            const caption = document.createElement('div');
+            caption.className = 'p-2 text-[11px] text-gray-600';
+            caption.textContent = item.station;
+
+            card.appendChild(img);
+            card.appendChild(caption);
+            container.appendChild(card);
+        });
     });
 
-    const filterEl = document.getElementById('line-filter');
-    if (type === 'top') {
-        filterEl.disabled = true;
-        filterEl.classList.add('opacity-50', 'bg-gray-100');
-        document.getElementById('chart-desc').innerText = '상위 10개 혼잡역은 필터와 관계없이 전체 데이터 기준입니다.';
-    } else {
-        filterEl.disabled = false;
-        filterEl.classList.remove('opacity-50', 'bg-gray-100');
-        document.getElementById('chart-desc').innerText = type === 'time' ?
-            '퇴근 시간대(18~19시) 평균 혼잡도가 가장 높게 예측됩니다.' :
-            '금요일 오후 시간대가 가장 혼잡한 것으로 분석됩니다.';
+    if (summaryEl) {
+        const dayLabel = DAY_LABELS[dayFilter] || dayFilter;
+        if (lineFilter === 'all') {
+            summaryEl.textContent = `호선별 상위 10개 그래프 (${dayLabel})`;
+        } else {
+            const lineLabel = lineLabels[lineFilter] || lineFilter;
+            summaryEl.textContent = `${lineLabel} 상위 10개 그래프 (${dayLabel})`;
+        }
     }
 
-    renderChart(type);
+    if (emptyEl) {
+        emptyEl.classList.toggle('hidden', totalItems > 0);
+    }
 };
-
-function renderChart(type) {
-    const ctx = document.getElementById('congestionChart').getContext('2d');
-    const dataSet = chartDataSets[type];
-
-    const displayData = type === 'top' ? dataSet.data.all : dataSet.data[window.currentFilter];
-
-    if (window.chartInstance) window.chartInstance.destroy();
-
-    const isBar = type === 'top' || type === 'day';
-    const bgColor = displayData.map(val => val >= 80 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)');
-
-    window.chartInstance = new Chart(ctx, {
-        type: isBar ? 'bar' : 'line',
-        data: {
-            labels: dataSet.labels,
-            datasets: [{
-                label: '혼잡도 (%)',
-                data: displayData,
-                borderColor: '#2563eb',
-                backgroundColor: isBar ? bgColor : 'rgba(37, 99, 235, 0.1)',
-                borderWidth: isBar ? 0 : 2,
-                tension: 0.4,
-                fill: !isBar,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            indexAxis: type === 'top' ? 'y' : 'x',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    grid: { display: type !== 'top' },
-                    ticks: { display: type !== 'top' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 10 } },
-                    max: 100
-                }
-            }
-        }
-    });
-}
