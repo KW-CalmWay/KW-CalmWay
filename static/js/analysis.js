@@ -170,6 +170,15 @@ const LINE_ORDER = ['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7
 const DAY_LABELS = { weekdays: '평일', weekend: '주말' };
 const lineLabels = {};
 const topGraphIndex = {};
+const MAP_LINES = [1, 2, 3, 4, 5, 6, 7, 8];
+const MAP_DIRECTIONS = {
+    up: '상선',
+    down: '하선',
+    line2: {
+        up: '내선',
+        down: '외선'
+    }
+};
 
 // 파일 경로를 인덱스로 변환
 TOP_GRAPH_FILES.forEach(path => {
@@ -295,3 +304,102 @@ window.renderTopGraphs = function () {
         emptyEl.classList.toggle('hidden', totalItems > 0);
     }
 };
+
+function buildMapPath(line, direction) {
+    return `/static/data/mapHtml/${direction}/map${line}${direction}.html`;
+}
+
+function getLineLabel(line) {
+    return lineLabels[`line${line}`] || `${line}호선`;
+}
+
+function getDirectionLabel(line, direction) {
+    if (line === 2 && MAP_DIRECTIONS.line2) {
+        return MAP_DIRECTIONS.line2[direction] || direction;
+    }
+    return MAP_DIRECTIONS[direction] || direction;
+}
+
+window.setAnalysisView = function (view, btnElement) {
+    const graphPanel = document.getElementById('analysis-graphs-panel');
+    const mapPanel = document.getElementById('analysis-maps-panel');
+    document.querySelectorAll('.analysis-toggle').forEach(el => el.classList.remove('active'));
+    if (btnElement) {
+        btnElement.classList.add('active');
+    }
+    if (view === 'maps') {
+        if (graphPanel) graphPanel.classList.add('hidden');
+        if (mapPanel) mapPanel.classList.remove('hidden');
+    } else {
+        if (mapPanel) mapPanel.classList.add('hidden');
+        if (graphPanel) graphPanel.classList.remove('hidden');
+    }
+};
+
+window.openAnalysisMapModal = function (line, direction) {
+    const modal = document.getElementById('analysis-map-modal');
+    const frame = document.getElementById('analysis-map-frame');
+    const title = document.getElementById('analysis-map-modal-title');
+    if (!modal || !frame) return;
+    const dirLabel = getDirectionLabel(line, direction);
+    const lineLabel = getLineLabel(line);
+    if (title) {
+        title.textContent = `${lineLabel} ${dirLabel} 혼잡도 지도`;
+    }
+    frame.src = buildMapPath(line, direction);
+    modal.classList.remove('hidden');
+};
+
+window.closeAnalysisMapModal = function () {
+    const modal = document.getElementById('analysis-map-modal');
+    const frame = document.getElementById('analysis-map-frame');
+    const title = document.getElementById('analysis-map-modal-title');
+    if (frame) {
+        frame.src = '';
+    }
+    if (title) {
+        title.textContent = '';
+    }
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+};
+
+window.renderMapCards = function () {
+    const container = document.getElementById('analysis-map-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    MAP_LINES.forEach(line => {
+        const card = document.createElement('div');
+        card.className = 'bg-gray-50 border border-gray-200 rounded-lg p-3 flex flex-col gap-2';
+
+        const header = document.createElement('div');
+        header.className = 'text-xs font-semibold text-gray-700';
+        header.textContent = getLineLabel(line);
+
+        const buttonRow = document.createElement('div');
+        buttonRow.className = 'grid grid-cols-2 gap-2';
+
+        const upBtn = document.createElement('button');
+        upBtn.type = 'button';
+        upBtn.className = 'text-xs font-semibold py-2 rounded-lg border border-blue-200 text-blue-600 bg-white hover:bg-blue-50';
+        upBtn.textContent = `${getDirectionLabel(line, 'up')} 지도`;
+        upBtn.addEventListener('click', () => window.openAnalysisMapModal(line, 'up'));
+
+        const downBtn = document.createElement('button');
+        downBtn.type = 'button';
+        downBtn.className = 'text-xs font-semibold py-2 rounded-lg border border-gray-200 text-gray-600 bg-white hover:bg-gray-50';
+        downBtn.textContent = `${getDirectionLabel(line, 'down')} 지도`;
+        downBtn.addEventListener('click', () => window.openAnalysisMapModal(line, 'down'));
+
+        buttonRow.appendChild(upBtn);
+        buttonRow.appendChild(downBtn);
+
+        card.appendChild(header);
+        card.appendChild(buttonRow);
+        container.appendChild(card);
+    });
+};
+
+window.renderMapCards();

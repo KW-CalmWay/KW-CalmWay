@@ -38,6 +38,15 @@
                 <img id="graph-modal-image" src="" alt="" />
             </div>
         </div>
+        <div id="analysis-map-modal" class="analysis-map-modal hidden" onclick="closeAnalysisMapModal()">
+            <div class="analysis-map-modal-content" onclick="event.stopPropagation()">
+                <button class="analysis-map-modal-close" onclick="closeAnalysisMapModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="analysis-map-modal-title" id="analysis-map-modal-title"></div>
+                <iframe id="analysis-map-frame" src="" title="혼잡도 지도"></iframe>
+            </div>
+        </div>
 
     </div>
 
