@@ -165,11 +165,28 @@ window.getSegmentLineColor = getSegmentLineColor;
 
 function getStopLabel(stop) {
     if (!stop) return '';
-    if (stop.type === 'subway') return `${stop.line}호선`;
-    if (stop.type === 'bus') return '버스';
+
+    if (stop.type === 'subway') {
+        return `${stop.line}호선`;
+    }
+
+    if (stop.type === 'bus') {
+        if (!stop.line) return '버스';
+
+        const parts = String(stop.line).split(':');
+        if (parts.length === 2) {
+            const [kind, num] = parts;
+            return `버스 · ${num}`;
+        }
+
+        return `버스 · ${stop.line}`;
+    }
+
     if (stop.type === 'walk') return '도보';
+
     return stop.type || '';
 }
+
 
 function normalizeStopName(stop) {
     if (!stop || !stop.name) return '';
@@ -327,11 +344,30 @@ window.setSortMode = function (mode, btnElement) {
     renderRoutes();
 };
 
+function normalizeCrowdScore(value) {
+    if (value === null || value === undefined || value === '') return null;
+
+    if (typeof value === 'string') {
+        const cleaned = value.replace(/[^\d.-]/g, '');
+        value = cleaned;
+    }
+    const score = Number(value);
+    if (!Number.isFinite(score)) return null;
+    return score;
+}
+
+
 function getCrowdBadge(score) {
-    if (!Number.isFinite(score)) return '';
-    if (score >= 80) return `<span class="crowd-high text-[10px] px-2 py-0.5 rounded-full font-bold">??? ${score}%</span>`;
-    if (score >= 40) return `<span class="crowd-medium text-[10px] px-2 py-0.5 rounded-full font-bold">??? ${score}%</span>`;
-    return `<span class="crowd-low text-[10px] px-2 py-0.5 rounded-full font-bold">??? ${score}%</span>`;
+    // null/undefined/NaN => 혼잡도 없음 배지
+    if (score === null || score === undefined || !Number.isFinite(score) || score < 0) {
+        return `<span class="crowd-none text-[10px] px-2 py-0.5 rounded-full font-bold bg-gray-200 text-gray-600">혼잡도 데이터 없음</span>`;
+    }
+
+    const rounded = Math.round(score);
+
+    if (rounded >= 80) return `<span class="crowd-high text-[10px] px-2 py-0.5 rounded-full font-bold">혼잡 ${rounded}%</span>`;
+    if (rounded >= 40) return `<span class="crowd-medium text-[10px] px-2 py-0.5 rounded-full font-bold">보통 ${rounded}%</span>`;
+    return `<span class="crowd-low text-[10px] px-2 py-0.5 rounded-full font-bold">쾌적 ${rounded}%</span>`;
 }
 
 
@@ -343,34 +379,17 @@ function getSearchMetaText() {
     return `${base} · ${meta.departTime} 출발`;
 }
 
-window.renderRoutes = function () {
-    const routes = [...window.routesData];
-    const hasCrowdData = routes.some(route => Number.isFinite(route.crowdScore));
-
-    if (window.currentSortMode === 'crowd' && hasCrowdData) {
-        routes.sort((a, b) => a.crowdScore - b.crowdScore);
-    } else if (window.currentSortMode === 'time') {
-        routes.sort((a, b) => a.totalTime - b.totalTime);
-    } else if (window.currentSortMode === 'transfer') {
-        routes.sort((a, b) => a.transferCount - b.transferCount);
-    } else if (window.currentSortMode === 'walk') {
-        routes.sort((a, b) => a.walkTime - b.walkTime);
-    }
-
-    const sortedRoutes = routes;
-
-    const meta = searchState.lastSearch;
-    const crowdNotice = window.currentSortMode === 'crowd' && !hasCrowdData
-        ? `<div class="text-xs text-gray-500 mb-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">혼잡도 데이터가 없습니다.</div>`
+function renderRouteCards(routes, metaText) {
+    const metaBlock = metaText
+        ? `<div class="text-[11px] text-gray-500 mb-2">${metaText}</div>`
         : '';
-    const metaText = getSearchMetaText();
 
-    routeList.innerHTML = crowdNotice + sortedRoutes.map((route, index) => {
+    return routes.map((route, index) => {
         const isTop = index === 0;
         const borderClass = isTop ? 'border-2 border-blue-500' : 'border border-gray-100';
         const topPaddingClass = isTop ? 'pt-6' : '';
 
-        const pathVisuals = route.pathDisplay.map((stop, i) => {
+        const pathVisuals = (route.pathDisplay || []).map((stop, i) => {
             const isLast = i === route.pathDisplay.length - 1;
             const lineColor = getLineColor(stop);
             const label = getStopLabel(stop);
@@ -389,9 +408,7 @@ window.renderRoutes = function () {
             `;
         }).join('');
 
-        const metaBlock = metaText
-            ? `<div class="text-[11px] text-gray-500 mb-2">${metaText}</div>`
-            : '';
+        const crowdScore = normalizeCrowdScore(route.crowdScore);
 
         return `
         <div onclick="openMap(${route.id})" class="bg-white ${borderClass} ${topPaddingClass} rounded-xl p-4 shadow-sm relative overflow-hidden transition-transform active:scale-95 cursor-pointer hover:shadow-md">
@@ -400,9 +417,10 @@ window.renderRoutes = function () {
             <div class="flex justify-between items-start mb-3">
                 <div class="flex items-center">
                     <span class="text-2xl font-bold text-gray-800 mr-2">${formatDuration(route.totalTime)}</span>
-                    ${getCrowdBadge(route.crowdScore)}
+                    ${getCrowdBadge(crowdScore)}
                 </div>
                 <div class="text-right">
+                    <div class="text-sm font-bold text-gray-800">${route.arrivalTime} 도착</div>
                     <div class="text-xs text-gray-400">${route.fare}원</div>
                 </div>
             </div>
@@ -421,4 +439,47 @@ window.renderRoutes = function () {
         </div>
         `;
     }).join('');
+}
+
+window.renderRoutes = function () {
+    const allRoutes = [...window.routesData];
+
+    // crowdScore 유효: 숫자이고 0 이상
+    const validCrowdRoutes = allRoutes.filter(route => {
+        const score = normalizeCrowdScore(route.crowdScore);
+        return score !== null && score >= 0;
+    });
+
+    const allCrowdMissing = allRoutes.length > 0 && validCrowdRoutes.length === 0;
+
+    // - sortMode=crowd 이고, 일부라도 crowdScore 없으면 → 그 경로 카드는 삭제(=필터링)
+    // - 모두 없으면 → "혼잡도 데이터가 없습니다" 표시
+    const metaText = getSearchMetaText();
+    const crowdNotice = (window.currentSortMode === 'crowd' && allCrowdMissing)
+        ? `<div class="text-xs text-gray-500 mb-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">혼잡도 데이터가 없습니다.</div>`
+        : '';
+
+    let routesToRender = [];
+
+    if (window.currentSortMode === 'crowd') {
+        if (!allCrowdMissing) {
+            // 일부라도 유효한 혼잡도가 있으면: 유효한 것만 남기고 정렬
+            routesToRender = validCrowdRoutes.sort((a, b) => {
+                const aScore = normalizeCrowdScore(a.crowdScore);
+                const bScore = normalizeCrowdScore(b.crowdScore);
+                return aScore - bScore;
+            });
+        } else {
+            // 전부 없으면: "최소 혼잡"에서는 카드 자체를 보여주지 않음
+            routesToRender = [];
+        }
+    } else if (window.currentSortMode === 'time') {
+        routesToRender = allRoutes.sort((a, b) => a.totalTime - b.totalTime);
+    } else if (window.currentSortMode === 'transfer') {
+        routesToRender = allRoutes.sort((a, b) => a.transferCount - b.transferCount);
+    } else if (window.currentSortMode === 'walk') {
+        routesToRender = allRoutes.sort((a, b) => a.walkTime - b.walkTime);
+    }
+
+    routeList.innerHTML = crowdNotice + renderRouteCards(routesToRender, metaText);
 };
