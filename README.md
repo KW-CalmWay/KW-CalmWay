@@ -69,6 +69,13 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+- 환경 변수 설정 (.env 파일 생성)
+
+    프로젝트 루트 디렉토리에 .env 파일을 생성하고,
+    TMAP에서 발급받은 API 키를 아래와 같이 입력합니다.
+    ```
+    TMAP_APP_KEY=발급받은_TMAP_API_KEY
+    ```
 - 접속: http://127.0.0.1:8000/
 
 ### 👥 팀 & 프로젝트
