@@ -10,8 +10,8 @@ const endResults = document.getElementById('end-results');
 window.currentSortMode = 'crowd';
 
 const searchState = {
-    start: { selected: null, timer: null },
-    end: { selected: null, timer: null },
+    start: { selected: null, timer: null, lastQuery: '', lastResultsQuery: '' },
+    end: { selected: null, timer: null, lastQuery: '', lastResultsQuery: '' },
     lastSearch: { startName: '', endName: '', departTime: '' }
 };
 
@@ -199,10 +199,12 @@ function normalizeStopName(stop) {
 
 async function fetchPoiResults(targetKey, query) {
     const container = targetKey === 'start' ? startResults : endResults;
+    const state = searchState[targetKey];
     try {
         const data = await Api.post('/api/poi/search', { query, count: 5 });
         const items = data && Array.isArray(data.items) ? data.items : [];
         renderResults(container, items, item => setSelected(targetKey, item));
+        state.lastResultsQuery = query;
     } catch (err) {
         console.error(err);
         clearResults(container);
@@ -220,6 +222,7 @@ function scheduleSearch(targetKey, query) {
         return;
     }
 
+    state.lastQuery = query;
     state.timer = setTimeout(() => {
         fetchPoiResults(targetKey, query);
     }, 300);
@@ -250,7 +253,10 @@ if (startInput) {
     });
     startInput.addEventListener('focus', () => {
         const value = startInput.value.trim();
-        if (value.length >= 2) scheduleSearch('start', value);
+        if (value.length < 2) return;
+        if (!startResults.classList.contains('hidden') && searchState.start.lastResultsQuery === value) return;
+        if (searchState.start.lastQuery === value && searchState.start.lastResultsQuery === value) return;
+        scheduleSearch('start', value);
     });
 }
 
@@ -261,7 +267,10 @@ if (endInput) {
     });
     endInput.addEventListener('focus', () => {
         const value = endInput.value.trim();
-        if (value.length >= 2) scheduleSearch('end', value);
+        if (value.length < 2) return;
+        if (!endResults.classList.contains('hidden') && searchState.end.lastResultsQuery === value) return;
+        if (searchState.end.lastQuery === value && searchState.end.lastResultsQuery === value) return;
+        scheduleSearch('end', value);
     });
 }
 
