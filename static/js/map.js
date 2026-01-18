@@ -71,12 +71,22 @@ function getMarkerColor(marker) {
     return '#ef4444';
 }
 
+function formatTotalMinutes(totalMinutes) {
+    if (!Number.isFinite(totalMinutes)) return '';
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (hours > 0) {
+        return `${hours}\uC2DC\uAC04 ${mins}\uBD84`;
+    }
+    return `${mins}\uBD84`;
+}
+
 window.openMap = function (routeId) {
     const route = window.routesData.find(r => r.id === routeId);
     if (!route) return;
 
     document.getElementById('map-route-title').innerText = route.pathSummary;
-    document.getElementById('map-route-desc').innerText = `총 ${route.totalTime}분 | 환승 ${route.transferCount}회 | 요금 ${route.fare}원`;
+    document.getElementById('map-route-desc').innerText = `\uCD1D ${formatTotalMinutes(route.totalTime)} | \uD658\uC2B9 ${route.transferCount}\uD68C | \uC694\uAE08 ${route.fare}\uC6D0`;
 
     const legend = document.getElementById('map-legend');
 

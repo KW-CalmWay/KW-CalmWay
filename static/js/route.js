@@ -365,9 +365,9 @@ function getCrowdBadge(score) {
 
     const rounded = Math.round(score);
 
-    if (rounded >= 80) return `<span class="crowd-high text-[10px] px-2 py-0.5 rounded-full font-bold">혼잡 ${rounded}%</span>`;
-    if (rounded >= 40) return `<span class="crowd-medium text-[10px] px-2 py-0.5 rounded-full font-bold">보통 ${rounded}%</span>`;
-    return `<span class="crowd-low text-[10px] px-2 py-0.5 rounded-full font-bold">쾌적 ${rounded}%</span>`;
+    if (rounded >= 80) return `<span class="crowd-high text-[10px] px-2 py-0.5 rounded-full font-bold">혼잡도 ${rounded}%</span>`;
+    if (rounded >= 40) return `<span class="crowd-medium text-[10px] px-2 py-0.5 rounded-full font-bold">혼잡도 ${rounded}%</span>`;
+    return `<span class="crowd-low text-[10px] px-2 py-0.5 rounded-full font-bold">혼잡도 ${rounded}%</span>`;
 }
 
 
