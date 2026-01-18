@@ -1,4 +1,5 @@
 import os
+import re
 import glob
 import pickle
 import folium
@@ -15,7 +16,7 @@ from sklearn.model_selection import train_test_split
 
 files = glob.glob('static/data/subway_data/*.csv')
 dfs = []
-
+ 
 colors = {
     1: '#0052a4',
     2: '#00a84d',
@@ -98,10 +99,10 @@ if os.path.exists(file_path): # 이미 모델을 훈련시켰으면
             loaded_subway_rf = pickle.load(f)
 else: # 모델 훈련 처음이면
     # 모델 훈련
-    model = RandomForestRegressor(n_estimators=50, random_state=42)
-    model.fit(X_train, y_train)
+    loaded_subway_rf = RandomForestRegressor(n_estimators=50, random_state=42)
+    loaded_subway_rf.fit(X_train, y_train)
     with open("static/data/subway_rf.pkl", "wb") as f:
-        pickle.dump(model, f)
+        pickle.dump(loaded_subway_rf, f)
 
 
 
@@ -120,7 +121,7 @@ def pred_subway(subName, subLine, DateTime, direction):
     subNum = df_all.loc[(df_all["호선"] == subLine) & (df_all["출발역"] == subName), "역번호"].unique()[0]
 
     # 데이터에 존재하지 않는 역이면 -1 반환
-    if subNum not in subway_df['역번호']:
+    if subNum not in subway_df['역번호'].values:
         return -1
 
     # DateTime의 날짜/시간 정보 정수형으로 바꿈
@@ -152,7 +153,7 @@ def pred_subway(subName, subLine, DateTime, direction):
     # 예측
     pred_res = loaded_subway_rf.predict([[subNum, year, month, day, time, sun, sat, wday, inner, up, outer, down]])[0]
 
-    return pred_res
+    return float(pred_res)
 
 
 ''' 상위 10개의 역 그래프 이미지로 저장하는 함수
@@ -227,8 +228,11 @@ def draw_graph_top10(lineNum):
             formatted = time_tmp.replace("시", ":").replace("분", "")  # "5:30"
 
             # today_str = date.today().strftime("%Y-%m-%d")  # "2026-01-15"
-            dt = datetime.strptime("2026-01-17 " + formatted, "%Y-%m-%d %H:%M")
-  
+            dt = datetime.strptime("2026-01-18 " + formatted, "%Y-%m-%d %H:%M")
+
+            x_time = ["" if i % 2 ==0 else v for i, v in enumerate(timeStr)]
+            x_times = [re.sub(r"00분$", "", t) if t != "" else t for t in x_time]
+
 
             direction = ('내선', '외선') if lineNum==2 else ('상선','하선')
             res1.append(pred_subway(l, lineNum, dt, direction[0]))
@@ -239,29 +243,27 @@ def draw_graph_top10(lineNum):
         matplotlib.rcParams['font.family'] = 'Malgun Gothic'
         fig, axes = plt.subplots(1, 2, figsize=(10,4))
         # 첫 번째 그래프
-        axes[0].plot(timeStr, res1, marker='o', linestyle='-', color=colors[lineNum])
+        axes[0].plot(timeStr, res1, marker='o', linestyle='-', color=colors[lineNum], markersize = 4)
         axes[0].set_title(str(lineNum)+'호선 '+names[i] + " (주말/"+direction[0]+")")
-        axes[0].tick_params(axis='x', labelsize=7)  # x축 눈금 글자 크기를 8로
+        axes[0].tick_params(axis='x', labelsize=7) 
         axes[0].set_xlabel('시간대')
         axes[0].set_ylabel('혼잡도', rotation=0, labelpad=30)
-        axes[0].set_xticks(timeStr)
+        axes[0].set_xticks(range(len(x_times)),x_times)
         axes[0].tick_params(axis='x', rotation=45)
         axes[0].grid(True)
-        axes[0].legend(loc="best")
 
         # 두 번째 그래프
-        axes[1].plot(timeStr, res2, marker='o', linestyle='-', color=colors[lineNum])
+        axes[1].plot(timeStr, res2, marker='o', linestyle='-', color=colors[lineNum], markersize = 4)
         axes[1].set_title(str(lineNum)+'호선 '+names[i] + " (주말/"+direction[1]+")")
         axes[1].tick_params(axis='x', labelsize=7)
         axes[1].set_xlabel('시간대')
         axes[1].set_ylabel('혼잡도', rotation=0, labelpad=30)
-        axes[1].set_xticks(timeStr)
+        axes[1].set_xticks(range(len(x_times)),x_times)
         axes[1].tick_params(axis='x', rotation=45)
         axes[1].grid(True)
-        axes[1].legend(loc="best")
 
         plt.tight_layout()
-        plt.savefig(str(lineNum)+'호선_'+names[i]+'_주말.jpg', bbox_inches="tight")
+        plt.savefig('static/images/topGraph/weekend/line'+str(lineNum)+'/'+str(lineNum)+'호선_'+names[i]+'_주말.jpg', bbox_inches="tight", dpi = 300)
         # plt.show()
 
 
@@ -271,20 +273,37 @@ path: list(tuple) = [(역명1, 호선1), (역명2, 호선2), ... (역명n, 호�
                     
                     ex) [('중곡', 7), ('군자',7), ('어린이대공원', 7), ('건대입구', 7), ('구의', 2), ('강변', 2)]
 '''
-def draw_circles(path):
+
+# 지도에 마커 그리기
+def draw_circles(path, line, direction):
     sl = pd.read_csv('static/data/subway_data/subway_loc/지하철역위치좌표.csv')
-    center_lat = sl[sl['지하철역'].isin([n+'역' for n, _ in path])]['x좌표'].mean()
-    center_lon = sl[sl['지하철역'].isin([n+'역' for n, _ in path])]['y좌표'].mean()
+    center_lat = sl[sl['지하철역'].isin([n+'역' for n in path])]['x좌표'].mean()
+    center_lon = sl[sl['지하철역'].isin([n+'역' for n in path])]['y좌표'].mean()
     map_osm = folium.Map(location=[center_lat, center_lon], zoom_start=12)
+
+    if direction == 'up' and line == 2:
+        direction == 'inner'
+    elif direction == 'down' and line == 2:
+        direction == 'outer'
+
+    # print((sl['지하철역'] == '서울').any())
 
     # 특정 위도, 경도 중심으로 하는 OpenStreetMap을 출력
 
-    for name, line in path:
-        pred = pred_subway(name, line, datetime.now(), '상선')
+    for name in path:
+        pred = pred_subway(name, line, datetime.now(), direction)
 
-        # 서울의 중심에 위치하는 명동역의 위도와 경도를 중심으로 지도 출력
-        latitude = sl[sl['지하철역']== name+'역']['x좌표'].iloc[0]
-        longitude = sl[sl['지하철역']==name+'역']['y좌표'].iloc[0]
+        if name == '서울역':
+            filtered = sl[sl['지하철역'] == name]
+        else:
+            filtered = sl[sl['지하철역'] == name+'역']
+
+        if not filtered.empty:
+            latitude = filtered['x좌표'].iloc[0]
+            longitude = filtered['y좌표'].iloc[0]
+        else:
+            continue
+
         
         color = colors.get(line)
 
@@ -301,20 +320,25 @@ def draw_circles(path):
         # 역 정보 텍스트 추가 (역이름, 혼잡도)
         folium.Marker(
             location = [latitude, longitude],
-            icon = folium.DivIcon(html='<br><div style="display:flex;flex-direction:column;align-items:center;font-size:12px;color:black; white-space:nowrap; text-align:center;">''<div style="background-color:rgba(255,255,255,0.8);padding:3px 6px;border-radius:4px;border:1px solid gray;margin-top:2px;">'+name+'역<br>혼잡도: '+str(round(pred))+'</div>''</div>')
+            icon = folium.DivIcon(html='<br><div style="display:flex;flex-direction:column;align-items:center;font-size:7px;color:black; white-space:nowrap; text-align:center;">''<div style="background-color:rgba(255,255,255,0.8);padding:3px 6px;border-radius:4px;border:1px solid gray;margin-top:2px;">'+name+'역<br>혼잡도: '+str(round(pred))+'</div>''</div>')
         ).add_to(map_osm)
 
-    map_osm.save("map.html")
+    html_path = "static/data/mapHtml/"+direction+"/map"+str(line)+direction+".html"
+    map_osm.save(html_path)
     hti = Html2Image()
-    hti.screenshot(html_file="map.html", save_as="map.png")
-
+    hti.output_path = "static/images/maps/"+direction
+    hti.screenshot(html_file=html_path, save_as="map"+str(line)+direction+".png")
 
 
 ###  테스트용
 
 # Path = [('중곡', 7), ('군자',7), ('어린이대공원', 7), ('건대입구', 7), ('구의', 2), ('강변', 2)]
 
-# draw_circles(Path)
+# for i in range(1,9):
+#     tmp_df = df_all[df_all['호선']==i]
+#     sub_list = list(tmp_df['출발역'])
+#     draw_circles(sub_list, i, 'up') # 상선 / 내선
+#     draw_circles(sub_list, i, 'down') # 하선 / 외선
 
 
 # for i in range(1,9):
