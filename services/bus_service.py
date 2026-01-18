@@ -171,6 +171,9 @@ bus_df_melted = bus_df.melt(
     value_name = '혼잡도'
 )
 
+bus_df_melted['버스정류장ARS번호'] = bus_df_melted['버스정류장ARS번호'].astype(int)
+bus_df_melted['연도'] = bus_df_melted['연도'].astype(int)
+bus_df_melted['월'] = bus_df_melted['월'].astype(int)
 bus_df_melted['시간'] = bus_df_melted['시간'].str.extract(r'(\d+)')
 
 bus_df_melted['노선명'] = bus_df_melted['노선명'].astype(int)
@@ -204,8 +207,19 @@ else: # 모델 훈련 처음이면
 
 def pred_bus(busNum, stationNum, DateTime): 
 
+    print(
+    f"[pred_bus CALL] busNum={busNum}, "
+    f"stationNum={stationNum}, "
+    f"datetime={DateTime}",
+    flush=True
+    )
+
     # 데이터에 존재하지 않는 벗 이면 -1 반환
-    if busNum not in bus_df_melted['노선명']:
+    if busNum not in bus_df_melted['노선명'].values:
+        print(
+        f"[pred_bus MISS] busNum {busNum} not in train data",
+        flush=True
+        )
         return -1
 
     # DateTime의 날짜/시간 정보 정수형으로 바꿈
@@ -214,9 +228,19 @@ def pred_bus(busNum, stationNum, DateTime):
 
     time = DateTime.hour * 100 + DateTime.minute 
 
+    print(
+    f"[pred_bus INPUT] "
+    f"X=[{busNum}, {stationNum}, {year}, {month}, {time}]",
+    flush=True
+    )
+
+    stationNum = int(stationNum)
+    
     # 예측
     pred_res = loaded_bus_rf.predict([[busNum, stationNum, year, month, time]])[0]
 
+    print(f"[pred_bus OUTPUT] congestion={pred_res}", flush=True)
+    
     return float(pred_res)
 
 

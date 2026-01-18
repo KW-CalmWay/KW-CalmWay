@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -17,19 +17,40 @@
 <body>
     <div id="app-container">
 
+        <!-- 상단 헤더 -->
         {% include "partials/header.html" %}
 
         <div class="content-area bg-gray-50">
+            <!-- 탭 콘텐츠 -->
             {% include "partials/tabs/route.html" %}
             {% include "partials/tabs/analysis.html" %}
             {% include "partials/tabs/settings.html" %}
         </div>
 
+        <!-- 하단 내비게이션/모달 -->
         {% include "partials/nav.html" %}
         {% include "partials/map_modal.html" %}
+        <div id="graph-modal" class="graph-modal hidden" onclick="closeGraphModal()">
+            <div class="graph-modal-content" onclick="event.stopPropagation()">
+                <button class="graph-modal-close" onclick="closeGraphModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <img id="graph-modal-image" src="" alt="" />
+            </div>
+        </div>
+        <div id="analysis-map-modal" class="analysis-map-modal hidden" onclick="closeAnalysisMapModal()">
+            <div class="analysis-map-modal-content" onclick="event.stopPropagation()">
+                <button class="analysis-map-modal-close" onclick="closeAnalysisMapModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="analysis-map-modal-title" id="analysis-map-modal-title"></div>
+                <iframe id="analysis-map-frame" src="" title="혼잡도 지도"></iframe>
+            </div>
+        </div>
 
     </div>
 
+    <!-- 앱 스크립트 -->
     <script src="/static/js/state.js"></script>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/app.js"></script>

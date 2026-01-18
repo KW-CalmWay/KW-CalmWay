@@ -121,7 +121,7 @@ def pred_subway(subName, subLine, DateTime, direction):
     subNum = df_all.loc[(df_all["호선"] == subLine) & (df_all["출발역"] == subName), "역번호"].unique()[0]
 
     # 데이터에 존재하지 않는 역이면 -1 반환
-    if subNum not in subway_df['역번호']:
+    if subNum not in subway_df['역번호'].values:
         return -1
 
     # DateTime의 날짜/시간 정보 정수형으로 바꿈
