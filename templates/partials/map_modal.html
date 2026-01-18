@@ -1,0 +1,35 @@
+<div id="map-modal">
+    <div class="bg-white p-4 shadow-sm z-10 flex justify-between items-center border-b">
+        <div>
+            <h2 class="font-bold text-gray-800 text-lg" id="map-route-title">경로 상세</h2>
+            <p class="text-xs text-gray-500" id="map-route-desc">총 35분 | 환승 1회</p>
+        </div>
+        <button onclick="closeMap()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="flex-1 bg-gray-100 relative overflow-hidden">
+        <div id="map_div" class="absolute inset-0"></div>
+
+        <div id="map-legend" class="absolute bottom-4 left-4 bg-white/90 backdrop-blur p-2 rounded-lg shadow text-xs border border-gray-200" style="display: none;">
+            <div class="flex items-center mb-1"><div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>혼잡도</div>
+            <div class="flex items-center mb-1"><div class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>혼잡도</div>
+            <div class="flex items-center"><div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>혼잡도</div>
+        </div>
+    </div>
+<!--
+    <div class="bg-white p-4 pb-8 border-t rounded-t-xl shadow-lg -mt-4 z-10">
+        <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-gray-700">최고 혼잡 구간</span>
+                <span class="text-xs text-red-500 font-bold bg-red-50 px-2 py-1 rounded border border-red-100"><i class="fas fa-exclamation-triangle mr-1"></i>교대-서초 (95%)</span>
+            </div>
+            <div class="text-xs text-gray-500">
+                이 구간은 18:40경 가장 붐빌 것으로 예상됩니다. 앞쪽 칸(1-1)을 이용하면 15% 정도 덜 혼잡합니다.
+            </div>
+        </div>
+    </div>
+-->
+</div>

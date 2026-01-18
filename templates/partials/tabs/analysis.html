@@ -1,0 +1,48 @@
+﻿<div id="tab-analysis" class="tab-content px-4 pb-4 -mt-2">
+    <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+        <div class="mb-3">
+            <h2 class="text-base font-bold text-gray-800 mb-2">AI 혼잡도 분석</h2>
+            <p class="text-xs text-gray-500 leading-relaxed">
+                2024~2025년 서울시 대중교통 승하차 공공데이터를 학습한 Random Forest 모델 예측 결과입니다.
+            </p>
+        </div>
+
+        <div class="mb-4 flex gap-2">
+            <button type="button" class="analysis-toggle active w-full text-xs font-semibold py-2 rounded-full border border-gray-200" onclick="setAnalysisView('graphs', this)">혼잡도 그래프</button>
+            <button type="button" class="analysis-toggle w-full text-xs font-semibold py-2 rounded-full border border-gray-200" onclick="setAnalysisView('maps', this)">혼잡도 지도</button>
+        </div>
+
+        <div id="analysis-graphs-panel">
+            <!-- 노선/요일 필터 -->
+            <div class="mb-3 grid grid-cols-2 gap-2">
+                <select id="line-filter" onchange="applyFilter()" class="w-full p-2 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500 bg-white">
+                    <option value="all">전체 노선</option>
+                    <option value="line1" selected>1호선</option>
+                    <option value="line2">2호선</option>
+                    <option value="line3">3호선</option>
+                    <option value="line4">4호선</option>
+                    <option value="line5">5호선</option>
+                    <option value="line6">6호선</option>
+                    <option value="line7">7호선</option>
+                    <option value="line8">8호선</option>
+                </select>
+                <select id="day-filter" onchange="applyFilter()" class="w-full p-2 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500 bg-white">
+                    <option value="weekdays" selected>평일</option>
+                    <option value="weekend">주말</option>
+                </select>
+            </div>
+
+            <!-- 요약/카드 목록/비어있음 안내 -->
+            <div id="top-graph-summary" class="text-xs text-gray-500 mb-3"></div>
+            <div id="top-graph-list" class="grid grid-cols-2 gap-3"></div>
+            <div id="top-graph-empty" class="text-xs text-gray-400 mt-3 hidden">해당 조건의 그래프가 없습니다.</div>
+        </div>
+
+        <div id="analysis-maps-panel" class="hidden">
+            <div class="text-xs text-gray-500 mb-3">
+                호선별 상선/하선 혼잡도 지도를 확인하세요. 지도를 열면 스크롤로 확대/축소할 수 있습니다.
+            </div>
+            <div id="analysis-map-list" class="grid grid-cols-2 gap-3"></div>
+        </div>
+    </div>
+</div>
